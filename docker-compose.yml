@@ -1,0 +1,44 @@
+version: '3'
+services:
+  prometheus:
+    container_name: "prometheus"
+    volumes:
+      - ./prometheus_conf/:/etc/prometheus
+    ports:
+      - "9090:9090"
+    command: >
+      --config.file=/etc/prometheus/prometheus.yml
+      --storage.tsdb.path=/prometheus 
+      --web.console.libraries=/usr/share/prometheus/console_libraries 
+      --web.console.templates=/usr/share/prometheus/consoles 
+      --web.enable-lifecycle   
+    image: prom/prometheus
+    networks:
+      - prom
+  alertmanager:
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    image: prom/alertmanager
+    networks:
+      - prom
+  node-exporter: 
+    container_name: "node1"
+    image: prom/node-exporter
+    ports: 
+      - "9100:9100"
+    networks:
+      - prom   
+  grafana: 
+    container_name: "grafana"
+    image: grafana/grafana
+    environment:
+    - GF_SECURITY_ADMIN_PASSWORD=pass
+    ports: 
+      - "3000:3000"
+    networks:
+      - prom   
+    depends_on:
+      - prometheus
+networks: 
+  prom:
